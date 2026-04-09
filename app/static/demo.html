@@ -187,6 +187,28 @@
       margin-top: 10px;
     }
 
+    .help-box {
+      margin-top: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 10px 12px;
+    }
+
+    .help-box summary {
+      cursor: pointer;
+      color: #d7ecff;
+      font-weight: 600;
+    }
+
+    .help-box ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.4;
+    }
+
     .error {
       margin-top: 10px;
       color: #ff9aa2;
@@ -218,6 +240,19 @@
           <button id="runBtn" type="button">Analizar Riesgo</button>
         </div>
         <textarea id="payloadInput" spellcheck="false"></textarea>
+        <details class="help-box">
+          <summary>Guia rapida de campos del JSON</summary>
+          <ul>
+            <li><strong>LIMIT_BAL</strong>: limite de credito otorgado al cliente.</li>
+            <li><strong>SEX</strong>: sexo del cliente (1=masculino, 2=femenino).</li>
+            <li><strong>EDUCATION</strong>: nivel educativo (1=posgrado, 2=universidad, 3=secundaria, 4=otros).</li>
+            <li><strong>MARRIAGE</strong>: estado civil (1=casado, 2=soltero, 3=otros).</li>
+            <li><strong>AGE</strong>: edad del cliente.</li>
+            <li><strong>PAY_0, PAY_2...PAY_6</strong>: estado de pago en meses previos. Valores altos positivos implican mayor atraso.</li>
+            <li><strong>BILL_AMT1...BILL_AMT6</strong>: saldo facturado de la tarjeta en los ultimos 6 meses.</li>
+            <li><strong>PAY_AMT1...PAY_AMT6</strong>: monto pagado en los ultimos 6 meses.</li>
+          </ul>
+        </details>
         <p class="hint">Tip: edita valores y vuelve a ejecutar para ver cambios en probabilidad y explicacion.</p>
         <p class="error" id="errorBox"></p>
       </article>
