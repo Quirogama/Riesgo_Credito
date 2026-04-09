@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Credit Risk AI Demo</title>
+  <style>
+    :root {
+      --bg-1: #09121f;
+      --bg-2: #152a45;
+      --panel: rgba(255, 255, 255, 0.08);
+      --panel-border: rgba(255, 255, 255, 0.22);
+      --text: #f5fbff;
+      --muted: #b5cce2;
+      --ok: #1ac28a;
+      --warn: #f5a623;
+      --danger: #ef4d5a;
+      --accent: #39b4ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 10% 20%, #1f4874 0%, transparent 35%),
+                  radial-gradient(circle at 90% 70%, #0d5f66 0%, transparent 30%),
+                  linear-gradient(145deg, var(--bg-1), var(--bg-2));
+      padding: 20px;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .hero {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      padding: 18px;
+      backdrop-filter: blur(6px);
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 1.6rem;
+      letter-spacing: 0.3px;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 1.1rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #032033;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(180deg, #9ee2ff, #39b4ff);
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 280px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(5, 16, 28, 0.55);
+      color: #dcefff;
+      padding: 12px;
+      font-family: Consolas, "Courier New", monospace;
+      resize: vertical;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .kpi {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.18);
+    }
+
+    .kpi label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-bottom: 4px;
+    }
+
+    .kpi strong {
+      font-size: 1.15rem;
+    }
+
+    .pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .pill.low { background: rgba(26, 194, 138, 0.2); color: #75ffcf; }
+    .pill.high { background: rgba(239, 77, 90, 0.2); color: #ff9aa2; }
+
+    .bars {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 1.7fr 3fr auto;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+    }
+
+    .plus { background: linear-gradient(90deg, #f6b24a, #ef4d5a); }
+    .minus { background: linear-gradient(90deg, #1ac28a, #2fe0ff); }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.86rem;
+      margin-top: 10px;
+    }
+
+    .error {
+      margin-top: 10px;
+      color: #ff9aa2;
+      font-weight: 600;
+    }
+
+    @media (min-width: 980px) {
+      .grid {
+        grid-template-columns: 1.1fr 1fr;
+      }
+      .hero h1 {
+        font-size: 1.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>Credit Risk AI Console</h1>
+      <p>Demo visual para scoring de riesgo crediticio con XGBoost + SHAP.</p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Entrada JSON</h2>
+        <div class="controls">
+          <button id="loadExampleBtn" type="button">Cargar Ejemplo</button>
+          <button id="runBtn" type="button">Analizar Riesgo</button>
+        </div>
+        <textarea id="payloadInput" spellcheck="false"></textarea>
+        <p class="hint">Tip: edita valores y vuelve a ejecutar para ver cambios en probabilidad y explicacion.</p>
+        <p class="error" id="errorBox"></p>
+      </article>
+
+      <article class="card">
+        <h2>Resultado</h2>
+        <div class="kpis">
+          <div class="kpi">
+            <label>Probabilidad de impago</label>
+            <strong id="probVal">-</strong>
+          </div>
+          <div class="kpi">
+            <label>Etiqueta</label>
+            <strong id="labelVal">-</strong>
+          </div>
+          <div class="kpi">
+            <label>Nivel de riesgo</label>
+            <strong id="riskVal">-</strong>
+          </div>
+          <div class="kpi">
+            <label>Threshold</label>
+            <strong id="thrVal">-</strong>
+          </div>
+        </div>
+        <div id="riskPill"></div>
+        <h3 style="margin-top:14px; margin-bottom:8px;">Top SHAP Contributors</h3>
+        <div class="bars" id="bars"></div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const payloadInput = document.getElementById("payloadInput");
+    const errorBox = document.getElementById("errorBox");
+
+    const probVal = document.getElementById("probVal");
+    const labelVal = document.getElementById("labelVal");
+    const riskVal = document.getElementById("riskVal");
+    const thrVal = document.getElementById("thrVal");
+    const bars = document.getElementById("bars");
+    const riskPill = document.getElementById("riskPill");
+
+    const EXAMPLE_PAYLOAD = {
+      LIMIT_BAL: 200000,
+      SEX: 2,
+      EDUCATION: 2,
+      MARRIAGE: 1,
+      AGE: 29,
+      PAY_0: 0,
+      PAY_2: 0,
+      PAY_3: 0,
+      PAY_4: 0,
+      PAY_5: 0,
+      PAY_6: 0,
+      BILL_AMT1: 3913,
+      BILL_AMT2: 3102,
+      BILL_AMT3: 689,
+      BILL_AMT4: 0,
+      BILL_AMT5: 0,
+      BILL_AMT6: 0,
+      PAY_AMT1: 0,
+      PAY_AMT2: 689,
+      PAY_AMT3: 0,
+      PAY_AMT4: 0,
+      PAY_AMT5: 0,
+      PAY_AMT6: 0
+    };
+
+    function setExample() {
+      payloadInput.value = JSON.stringify(EXAMPLE_PAYLOAD, null, 2);
+      errorBox.textContent = "";
+    }
+
+    function asPercent(v) {
+      return `${(v * 100).toFixed(2)}%`;
+    }
+
+    function asNum(v) {
+      return Number(v).toFixed(4);
+    }
+
+    function renderPill(level) {
+      const cls = level === "high" ? "high" : "low";
+      riskPill.innerHTML = `<span class="pill ${cls}">${level === "high" ? "alto" : "bajo"}</span>`;
+    }
+
+    function renderBars(items) {
+      if (!items || items.length === 0) {
+        bars.innerHTML = "<p class='hint'>Sin contribuyentes SHAP disponibles.</p>";
+        return;
+      }
+
+      const maxAbs = Math.max(...items.map(i => Math.abs(i.shap_value))) || 1;
+
+      bars.innerHTML = items.map((it) => {
+        const width = (Math.abs(it.shap_value) / maxAbs) * 100;
+        const klass = it.shap_value >= 0 ? "plus" : "minus";
+        return `
+          <div class="bar-row">
+            <span>${it.feature}</span>
+            <div class="bar-track"><div class="bar-fill ${klass}" style="width:${width}%"></div></div>
+            <span>${asNum(it.shap_value)}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function runAnalysis() {
+      errorBox.textContent = "";
+      let payload;
+
+      try {
+        payload = JSON.parse(payloadInput.value);
+      } catch (e) {
+        errorBox.textContent = "JSON invalido. Revisa comas y llaves.";
+        return;
+      }
+
+      try {
+        const [predResp, expResp] = await Promise.all([
+          fetch("/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          }),
+          fetch("/explain?top_k=8", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          })
+        ]);
+
+        const pred = await predResp.json();
+        const exp = await expResp.json();
+
+        if (!predResp.ok) {
+          throw new Error(pred.detail || "Error en /predict");
+        }
+        if (!expResp.ok) {
+          throw new Error(exp.detail || "Error en /explain");
+        }
+
+        probVal.textContent = asPercent(pred.probability_default);
+        labelVal.textContent = String(pred.predicted_label);
+        riskVal.textContent = pred.risk_level;
+        thrVal.textContent = asNum(pred.threshold);
+        renderPill(pred.risk_level);
+        renderBars(exp.top_contributors);
+      } catch (e) {
+        errorBox.textContent = `No se pudo analizar: ${e.message}`;
+      }
+    }
+
+    document.getElementById("loadExampleBtn").addEventListener("click", setExample);
+    document.getElementById("runBtn").addEventListener("click", runAnalysis);
+
+    setExample();
+  </script>
+</body>
+</html>
