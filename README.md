@@ -169,37 +169,6 @@ Rutas útiles en producción:
 - Docs: https://riesgo-credito.onrender.com/docs
 - Health JSON: https://riesgo-credito.onrender.com/api/health
 
-## Utilizar el modelo
-
-### Desde PowerShell
-
-```powershell
-# Predicción
-$body = Get-Content .\examples\payload.json -Raw
-Invoke-RestMethod -Uri "http://127.0.0.1:8000/predict" -Method Post `
-  -ContentType "application/json" -Body $body
-
-# Explicación
-Invoke-RestMethod -Uri "http://127.0.0.1:8000/explain?top_k=8" -Method Post `
-  -ContentType "application/json" -Body $body
-```
-
-### Análisis exploratorio
-
-Abre el Notebook:
-
-```bash
-jupyter notebook notebooks/analysis.ipynb
-```
-
-Incluye:
-- Exploración de datos
-- Entrenamiento + validación
-- Visualización SHAP
-- Feature importance
-
----
-
 ## Dataset
 
 **Fuente:** [UCI ML - Default of Credit Card Clients](https://www.openml.org/d/1461)
@@ -222,19 +191,6 @@ Automáticamente descargado desde OpenML al entrenar.
 | API | FastAPI 0.115+ |
 | Server | Uvicorn 0.30+ |
 | Data | Pandas, Scikit-learn |
-
----
-
-## Notas de Producción
-
-- **Modelo entrenado en CPU** (sin GPU necesaria)
-- **AUC ~77.6%** varía ligeramente con versiones de librerías
-- **Threshold 50%** ajustable según tolerancia de riesgo
-- **SHAP se calcula en tiempo real** (~100ms por predicción en CPU)
-
-Para optimizar SHAP en producción:
-- Pre-calcular explicaciones top global (modelo-wide)
-- Usar background dataset reducido (default: 100 muestras)
 
 ---
 
