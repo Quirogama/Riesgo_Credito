@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import shap
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel, Field
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -74,6 +74,11 @@ def payload_to_frame(payload: LoanRequest) -> pd.DataFrame:
 
 
 @app.get("/")
+def root_redirect() -> RedirectResponse:
+    return RedirectResponse(url="/demo")
+
+
+@app.get("/api/health")
 def health() -> dict:
     return {
         "status": "ok",
